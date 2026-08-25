@@ -1,0 +1,50 @@
+.nav {
+  flex-wrap: wrap;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-right: auto;
+}
+
+.mark {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-accent-600);
+  display: grid;
+  place-items: center;
+  color: var(--color-accent-700);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.brandText {
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.sub {
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-neutral-600);
+}
+
+@media (max-width: 860px) {
+  .sub {
+    display: none;
+  }
+  .mark {
+    width: 26px;
+    height: 26px;
+    font-size: 12px;
+  }
+}

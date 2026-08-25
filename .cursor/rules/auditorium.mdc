@@ -1,0 +1,12 @@
+---
+description: Auditorium period sign-up — design + backend contract
+alwaysApply: true
+---
+
+- The design references in handoff_cursor_auditorium/designs/ are the source of truth for UI: layout, states, copy, and the light Nocturne tokens (accent #9184d9 ramp, text #24262e, ground #fcfcfe, red-day #b8384e family). Buttons are outlined, never solid-filled; headings max weight 500 (Inter).
+- Periods are the ordered list P1–P8 then After School ('AS'). A booking is one date + one period; unique (date, period).
+- Booking lifecycle: insert as 'pending' (public, anon) → admin confirms or declines. Never let the public client set status.
+- Drama classes are schedule_entries with kind='drama': render as flexible rose cells, still requestable; such requests carry drama_overlap=true and the admin row shows the theatre-teacher warning.
+- Blocks (kind='block') are hard: striped cells, not clickable.
+- School year Aug 20 2026 – Jun 18 2027; red/black alternates over school days only (holidays in README skipped), starting RED. Derive it, don't store it.
+- Admin access: Supabase Auth email+password, allow-listed admins; RLS as specified in README. No secrets in the browser bundle.
