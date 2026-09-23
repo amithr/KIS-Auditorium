@@ -10,7 +10,7 @@ function mapRow(row: {
   period: string;
   name: string;
   status: string;
-  drama_overlap: boolean;
+  block_overlap: boolean;
   created_at: string;
   confirmed_at: string | null;
 }): Booking {
@@ -20,7 +20,7 @@ function mapRow(row: {
     period: row.period as PeriodId,
     name: row.name,
     status: row.status as Booking["status"],
-    drama_overlap: row.drama_overlap,
+    block_overlap: row.block_overlap,
     created_at: row.created_at,
     confirmed_at: row.confirmed_at,
   };
@@ -100,14 +100,14 @@ export function useBookings() {
   );
 
   const requestBooking = useCallback(
-    async (date: string, period: PeriodId, name: string, drama: boolean) => {
+    async (date: string, period: PeriodId, name: string, blockOverlap: boolean) => {
       const supabase = createClient();
       const { error: err } = await supabase.from("bookings").insert({
         date,
         period,
         name,
         status: "pending",
-        drama_overlap: drama,
+        block_overlap: blockOverlap,
       });
       if (err) throw new Error(err.message);
       await refresh();

@@ -18,22 +18,19 @@ export function resolveCell(
   const noSchool = !isSchoolDay(date);
   const past = date.getTime() < today.getTime();
 
-  if (booking && !noSchool) {
-    return booking.status === "pending"
-      ? { kind: "pending", booking }
-      : { kind: "confirmed", booking };
-  }
-
   if (noSchool) return { kind: "no_school" };
-  if (past) return { kind: "past" };
+
+  if (booking?.status === "confirmed") return { kind: "confirmed", booking };
 
   const entry = findEntry(entries, date, period);
-  if (entry && entry.kind === "block") {
-    return { kind: "blocked", entry };
+  if (booking) {
+    return entry
+      ? { kind: "blocked", entry, booking }
+      : { kind: "pending", booking };
   }
-  if (entry && entry.kind === "drama") {
-    return { kind: "drama", entry };
-  }
+
+  if (past) return { kind: "past" };
+  if (entry) return { kind: "blocked", entry };
   if (selected) return { kind: "selected" };
   return { kind: "open" };
 }
@@ -42,7 +39,7 @@ export function cellIsClickable(state: CellState): boolean {
   return (
     state.kind === "open" ||
     state.kind === "selected" ||
-    state.kind === "drama" ||
+    state.kind === "blocked" ||
     state.kind === "pending" ||
     state.kind === "confirmed"
   );

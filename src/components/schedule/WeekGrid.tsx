@@ -130,10 +130,12 @@ export function WeekGrid({
               text = `${state.booking.name} · pending`;
             } else if (state.kind === "confirmed") {
               text = state.booking.name;
-            } else if (state.kind === "drama") {
-              text = `${state.entry.reason} · ask to book`;
             } else if (state.kind === "blocked") {
-              text = state.entry.reason;
+              text = state.booking
+                ? `${state.entry.reason} · request pending`
+                : isSel
+                  ? "Selected"
+                  : state.entry.reason;
             } else if (state.kind === "selected") {
               text = "Selected";
             }

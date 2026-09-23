@@ -20,7 +20,7 @@ import {
   periodLabel,
   periodRangeLabel,
 } from "@/lib/periods";
-import type { Dow, EntryKind, EntryRepeat, PeriodId } from "@/lib/types";
+import type { Dow, EntryRepeat, PeriodId } from "@/lib/types";
 import styles from "./AdminPanel.module.css";
 
 type AdminTab = "bookings" | "blocks";
@@ -38,7 +38,6 @@ export function AdminPanel() {
 
   const [tab, setTab] = useState<AdminTab>("bookings");
   const [blkOpen, setBlkOpen] = useState(true);
-  const [blkKind, setBlkKind] = useState<EntryKind>("block");
   const [blkRepeat, setBlkRepeat] = useState<EntryRepeat>("once");
   const [blkDate, setBlkDate] = useState(() => toIso(todayLocal()));
   const [blkDow, setBlkDow] = useState<Dow>("MON");
@@ -185,16 +184,13 @@ export function AdminPanel() {
     setBlkError(null);
     try {
       await addEntry({
-        kind: blkKind,
         repeat: blkRepeat,
         date: blkDate,
         dow: blkDow,
         until: blkUntil || null,
         from_period: rangeFrom,
         to_period: rangeTo,
-        reason:
-          blkReason.trim() ||
-          (blkKind === "drama" ? "Drama class" : "Blocked"),
+        reason: blkReason.trim() || "Blocked",
       });
       setBlkReason("");
     } catch (e) {
@@ -312,7 +308,7 @@ export function AdminPanel() {
           className={tab === "blocks" ? styles.pillActive : styles.pill}
           onClick={() => setTab("blocks")}
         >
-          Blocks &amp; Drama classes
+          Blocks
           {entries.length > 0 && (
             <span className={styles.pillMuted}>{entries.length}</span>
           )}
@@ -356,10 +352,10 @@ export function AdminPanel() {
                       month: "short",
                     })}
                   </div>
-                  {r.drama_overlap && (
-                    <div className={styles.dramaWarn}>
-                      ⚠ Overlaps a Drama class — check with the theatre teacher
-                      before confirming
+                  {r.block_overlap && (
+                    <div className={styles.blockWarn}>
+                      ⚠ Overlaps a block — confirming replaces the block for
+                      this period
                     </div>
                   )}
                 </div>
@@ -403,9 +399,9 @@ export function AdminPanel() {
                         month: "short",
                       })}
                     </div>
-                    {r.drama_overlap && (
-                      <div className={styles.mDrama}>
-                        ⚠ Overlaps Drama. Check with the theatre teacher first.
+                    {r.block_overlap && (
+                      <div className={styles.mBlock}>
+                        ⚠ Overlaps a block. Confirming replaces it.
                       </div>
                     )}
                   </div>
@@ -466,9 +462,9 @@ export function AdminPanel() {
 
           <p className={`text-muted ${styles.helper}`}>
             Requests stay pending until the office approves them. Before
-            confirming, check with the theatre teacher and other staff for
-            conflicts. Confirming turns the slot solid on the Schedule page;
-            declining frees the period.
+            confirming, check with other staff for conflicts. Confirming turns
+            the slot solid on the Schedule page, even over a block; declining
+            frees the period.
           </p>
         </section>
       )}
@@ -477,13 +473,13 @@ export function AdminPanel() {
         <section className={`${styles.section} ${styles.blocksSection}`}>
           <div className={styles.blocksHead}>
             <div className={styles.blocksHeadLeft}>
-              <h4>Blocks &amp; Drama classes</h4>
+              <h4>Blocks</h4>
               {entries.length > 0 && (
                 <span className="tag tag-neutral">{entries.length} ACTIVE</span>
               )}
               <span className={styles.blocksBlurb}>
-                Blocks close the auditorium outright; Drama classes stay
-                requestable.
+                Teachers can still request blocked periods; an approved request
+                replaces the block.
               </span>
             </div>
             <button
@@ -499,18 +495,6 @@ export function AdminPanel() {
           {blkOpen && (
             <>
               <div className={styles.blockForm}>
-                <div className="field">
-                  <label htmlFor="blk-kind">Type</label>
-                  <select
-                    id="blk-kind"
-                    className="select"
-                    value={blkKind}
-                    onChange={(e) => setBlkKind(e.target.value as EntryKind)}
-                  >
-                    <option value="block">Block — no bookings</option>
-                    <option value="drama">Drama class — flexible</option>
-                  </select>
-                </div>
                 <div className="field">
                   <label htmlFor="blk-repeat">Repeat</label>
                   <select
@@ -602,11 +586,7 @@ export function AdminPanel() {
                     className="input"
                     value={blkReason}
                     onChange={(e) => setBlkReason(e.target.value)}
-                    placeholder={
-                      blkKind === "drama"
-                        ? "e.g. Drama — Gr. 9/10"
-                        : "e.g. Pep rally setup, maintenance"
-                    }
+                    placeholder="e.g. Drama — Gr. 9/10, pep rally setup"
                   />
                 </div>
                 <button
@@ -615,7 +595,7 @@ export function AdminPanel() {
                   onClick={() => void addBlock()}
                   disabled={blkBusy}
                 >
-                  {blkKind === "drama" ? "Add class →" : "Block →"}
+                  Block →
                 </button>
               </div>
 
@@ -632,9 +612,8 @@ export function AdminPanel() {
 
           {entries.length > 0 && (
             <div className={styles.activeBlocks}>
-              <h6>Active blocks &amp; classes</h6>
+              <h6>Active blocks</h6>
               {entries.map((b) => {
-                const isDrama = b.kind === "drama";
                 const when =
                   (b.repeat === "once"
                     ? formatOnceLabel(b.date!)
@@ -645,24 +624,19 @@ export function AdminPanel() {
                     <div
                       className={styles.swatch}
                       style={{
-                        background: isDrama
-                          ? "var(--red-tint)"
-                          : "repeating-linear-gradient(45deg, var(--color-neutral-200) 0, var(--color-neutral-200) 3px, var(--color-neutral-100) 3px, var(--color-neutral-100) 6px)",
-                        border: `1px solid ${isDrama ? "var(--red-line)" : "var(--color-neutral-300)"}`,
+                        background:
+                          "repeating-linear-gradient(45deg, var(--color-neutral-200) 0, var(--color-neutral-200) 3px, var(--color-neutral-100) 3px, var(--color-neutral-100) 6px)",
+                        border: "1px solid var(--color-neutral-300)",
                       }}
                     />
                     <span
                       className="tag"
                       style={{
-                        background: isDrama
-                          ? "var(--red-tint)"
-                          : "var(--color-neutral-200)",
-                        color: isDrama
-                          ? "var(--red-deep)"
-                          : "var(--color-neutral-800)",
+                        background: "var(--color-neutral-200)",
+                        color: "var(--color-neutral-800)",
                       }}
                     >
-                      {isDrama ? "DRAMA" : "BLOCK"}
+                      {b.repeat === "once" ? "ONE DAY" : "WEEKLY"}
                     </span>
                     <span className={styles.blockWhen}>{when}</span>
                     <span className={styles.blockReason}>{b.reason}</span>
@@ -682,9 +656,8 @@ export function AdminPanel() {
           )}
 
           <p className={`text-muted ${styles.helper}`}>
-            Blocked periods show striped on the Schedule page with your label —
-            teachers can&apos;t request them. Drama classes show as flexible; the
-            theatre teacher confirms those requests.
+            Blocked periods show striped on the Schedule page with your label.
+            A one-day block overrides a weekly block for the periods it covers.
           </p>
         </section>
       )}

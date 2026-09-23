@@ -33,7 +33,7 @@ import styles from "./ScheduleView.module.css";
 function buildSelection(
   date: Date,
   period: PeriodId,
-  drama: boolean,
+  blockReason: string | null,
   booking: Selection["booking"],
 ): Selection {
   const p = PERIODS.find((x) => x.id === period)!;
@@ -44,7 +44,7 @@ function buildSelection(
     dateLabel: formatShortDate(date),
     periodLabel: p.label,
     periodTime: p.time,
-    drama,
+    blockReason,
     booking,
   };
 }
@@ -87,18 +87,12 @@ export function ScheduleView() {
         entries,
         false,
       );
-      if (
-        state.kind === "blocked" ||
-        state.kind === "past" ||
-        state.kind === "no_school"
-      ) {
-        return;
-      }
+      if (state.kind === "past" || state.kind === "no_school") return;
       setSel(
         buildSelection(
           date,
           period,
-          state.kind === "drama",
+          state.kind === "blocked" ? state.entry.reason : null,
           booking,
         ),
       );
@@ -124,7 +118,7 @@ export function ScheduleView() {
     setBusy(true);
     setFormError(null);
     try {
-      await requestBooking(sel.date, sel.period, name, sel.drama);
+      await requestBooking(sel.date, sel.period, name, !!sel.blockReason);
       setJustSaved(`${sel.date}|${sel.period}`);
       clearSelection();
       setTimeout(() => setJustSaved(null), 600);
@@ -252,12 +246,8 @@ export function ScheduleView() {
           />
           <LegendItem className={styles.swatchConfirmed} label="Confirmed" />
           <LegendItem
-            className={styles.swatchDrama}
-            label="Drama class — often flexible, ask first"
-          />
-          <LegendItem
             className={styles.swatchBlocked}
-            label="Blocked by the office"
+            label="Blocked — you can still request; the office decides"
           />
         </div>
       </div>

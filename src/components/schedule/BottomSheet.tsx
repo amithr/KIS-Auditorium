@@ -64,10 +64,10 @@ export function BottomSheet({
         </>
       ) : (
         <>
-          {selection.drama ? (
-            <div className={styles.dramaHint}>
-              Drama class scheduled — request and the theatre teacher will
-              confirm whether it&apos;s possible.
+          {selection.blockReason ? (
+            <div className={styles.blockHint}>
+              Blocked: {selection.blockReason}. You can still request it — if
+              the office approves, your booking replaces the block.
             </div>
           ) : (
             <div className={styles.hint}>
@@ -90,9 +90,7 @@ export function BottomSheet({
             onClick={onSubmit}
             disabled={busy}
           >
-            {selection.drama
-              ? "Request — pending teacher's OK"
-              : "Request this period"}
+            Request this period
           </button>
         </>
       )}

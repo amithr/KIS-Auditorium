@@ -101,11 +101,6 @@
   border: 1.5px solid var(--color-accent-500);
 }
 
-.swatchDrama {
-  background: var(--red-tint);
-  border: 1.5px dashed var(--red-line);
-}
-
 .swatchBlocked {
   background: repeating-linear-gradient(
     45deg,

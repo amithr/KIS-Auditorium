@@ -6,7 +6,6 @@ import type { Dow, NewScheduleEntry, PeriodId, ScheduleEntry } from "@/lib/types
 
 function mapRow(row: {
   id: string;
-  kind: string;
   repeat: string;
   date: string | null;
   dow: string | null;
@@ -18,7 +17,6 @@ function mapRow(row: {
 }): ScheduleEntry {
   return {
     id: row.id,
-    kind: row.kind as ScheduleEntry["kind"],
     repeat: row.repeat as ScheduleEntry["repeat"],
     date: row.date,
     dow: row.dow as Dow | null,
@@ -97,7 +95,6 @@ export function useScheduleEntries() {
     async (entry: NewScheduleEntry) => {
       const supabase = createClient();
       const { error: err } = await supabase.from("schedule_entries").insert({
-        kind: entry.kind,
         repeat: entry.repeat,
         date: entry.repeat === "once" ? entry.date ?? null : null,
         dow: entry.repeat === "weekly" ? entry.dow ?? null : null,

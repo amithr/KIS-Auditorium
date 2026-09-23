@@ -68,34 +68,14 @@ export function RequestBar({
         </>
       )}
 
-      {!booked && selection.drama && (
+      {!booked && (
         <>
-          <span className={styles.dramaNote}>
-            Drama class scheduled — many Drama classes are flexible and don&apos;t
-            need the auditorium, but some are not. Request the period and the
-            theatre teacher will confirm whether it&apos;s possible.
-          </span>
-          <input
-            className={`input ${styles.input}`}
-            value={bookName}
-            onChange={(e) => onBookNameChange(e.target.value)}
-            placeholder="Your name and purpose (e.g. Ms. Rivera — 8B assembly practice)"
-            onKeyDown={(e) => e.key === "Enter" && onSubmit()}
-          />
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={onSubmit}
-            disabled={busy}
-            style={{ whiteSpace: "nowrap" }}
-          >
-            Request — pending teacher&apos;s OK
-          </button>
-        </>
-      )}
-
-      {!booked && !selection.drama && (
-        <>
+          {selection.blockReason && (
+            <span className={styles.blockNote}>
+              Blocked: {selection.blockReason}. You can still request it — if
+              the office approves, your booking replaces the block.
+            </span>
+          )}
           <input
             className={`input ${styles.input}`}
             value={bookName}

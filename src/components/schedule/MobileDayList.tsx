@@ -46,14 +46,12 @@ export function MobileDayList({
           status = state.booking.name;
           action = "CONFIRMED";
           rowClass = styles.confirmed;
-        } else if (state.kind === "drama") {
-          status = `${state.entry.reason} · ask to book`;
-          action = "Ask";
-          rowClass = styles.drama;
         } else if (state.kind === "blocked") {
-          status = state.entry.reason;
-          action = "";
-          rowClass = styles.blocked;
+          status = isSel && !state.booking ? "Selected" : state.entry.reason;
+          action = state.booking ? "PENDING" : isSel ? "" : "Request";
+          rowClass = isSel
+            ? `${styles.blocked} ${styles.selected}`
+            : styles.blocked;
         } else if (state.kind === "past" || state.kind === "no_school") {
           status = state.kind === "no_school" ? "No school" : "Past";
           action = "";

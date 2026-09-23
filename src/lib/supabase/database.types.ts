@@ -31,7 +31,7 @@ export type Database = {
           period: string;
           name: string;
           status: string;
-          drama_overlap: boolean;
+          block_overlap: boolean;
           created_at: string;
           confirmed_at: string | null;
         };
@@ -41,7 +41,7 @@ export type Database = {
           period: string;
           name: string;
           status?: string;
-          drama_overlap?: boolean;
+          block_overlap?: boolean;
           created_at?: string;
           confirmed_at?: string | null;
         };
@@ -51,7 +51,7 @@ export type Database = {
           period?: string;
           name?: string;
           status?: string;
-          drama_overlap?: boolean;
+          block_overlap?: boolean;
           created_at?: string;
           confirmed_at?: string | null;
         };
@@ -60,7 +60,6 @@ export type Database = {
       schedule_entries: {
         Row: {
           id: string;
-          kind: string;
           repeat: string;
           date: string | null;
           dow: string | null;
@@ -72,7 +71,6 @@ export type Database = {
         };
         Insert: {
           id?: string;
-          kind: string;
           repeat: string;
           date?: string | null;
           dow?: string | null;
@@ -84,7 +82,6 @@ export type Database = {
         };
         Update: {
           id?: string;
-          kind?: string;
           repeat?: string;
           date?: string | null;
           dow?: string | null;

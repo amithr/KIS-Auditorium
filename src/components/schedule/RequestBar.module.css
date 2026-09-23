@@ -34,7 +34,7 @@
   font-weight: 500;
 }
 
-.dramaNote {
+.blockNote {
   flex: 1 1 100%;
   font-size: 13.5px;
   color: var(--red-deep);

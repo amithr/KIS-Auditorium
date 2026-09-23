@@ -143,16 +143,6 @@
   color: var(--color-accent-800);
 }
 
-.cell_drama {
-  background: var(--red-tint);
-  border: 1.5px dashed var(--red-line);
-  color: var(--red-deep);
-}
-
-.cell_drama:not(:disabled):hover {
-  border-color: var(--red-day);
-}
-
 .cell_blocked {
   background: repeating-linear-gradient(
     45deg,
@@ -173,15 +163,10 @@
 }
 
 .cellSelected.cell_pending,
-.cellSelected.cell_confirmed {
+.cellSelected.cell_confirmed,
+.cellSelected.cell_blocked {
   border: 1.5px solid var(--color-accent-600);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 25%, transparent);
-  transform: scale(1.03);
-}
-
-.cellSelected.cell_drama {
-  border: 1.5px solid var(--red-day);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--red-day) 25%, transparent);
   transform: scale(1.03);
 }
 

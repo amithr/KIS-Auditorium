@@ -7,7 +7,7 @@ Next.js (App Router) + Supabase app for one school auditorium, school year **202
 | Route | Who | What |
 |-------|-----|------|
 | `/schedule` | Public | Week grid (desktop) / day list + bottom sheet (mobile 1a) |
-| `/admin` | Auth + admin allow-list | Pill tabs: Booking requests (inbox + confirmed) and Blocks & Drama classes |
+| `/admin` | Auth + admin allow-list | Pill tabs: Booking requests (inbox + confirmed) and Blocks |
 
 ## Setup
 
