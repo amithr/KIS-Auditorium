@@ -46,7 +46,7 @@ export function BottomSheet({
         <>
           <div className={styles.hint}>
             {pending
-              ? "Awaiting Masha's approval"
+              ? "Awaiting office approval"
               : "Confirmed — contact the office to change"}
           </div>
           <div className={styles.bookedName}>{selection.booking.name}</div>
@@ -71,7 +71,7 @@ export function BottomSheet({
             </div>
           ) : (
             <div className={styles.hint}>
-              Pending until Masha approves — you&apos;ll get a notification.
+              Pending until the office approves — you&apos;ll get a notification.
             </div>
           )}
           <input

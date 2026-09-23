@@ -23,6 +23,8 @@ import {
 import type { Dow, EntryKind, EntryRepeat, PeriodId } from "@/lib/types";
 import styles from "./AdminPanel.module.css";
 
+type AdminTab = "bookings" | "blocks";
+
 export function AdminPanel() {
   const [authed, setAuthed] = useState<boolean | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -34,6 +36,8 @@ export function AdminPanel() {
   const { bookings, confirmBooking, cancelBooking } = useBookings();
   const { entries, addEntry, removeEntry } = useScheduleEntries();
 
+  const [tab, setTab] = useState<AdminTab>("bookings");
+  const [blkOpen, setBlkOpen] = useState(true);
   const [blkKind, setBlkKind] = useState<EntryKind>("block");
   const [blkRepeat, setBlkRepeat] = useState<EntryRepeat>("once");
   const [blkDate, setBlkDate] = useState(() => toIso(todayLocal()));
@@ -44,9 +48,6 @@ export function AdminPanel() {
   const [blkReason, setBlkReason] = useState("");
   const [blkError, setBlkError] = useState<string | null>(null);
   const [blkBusy, setBlkBusy] = useState(false);
-  const [mobileTab, setMobileTab] = useState<"requests" | "blocks" | "upcoming">(
-    "requests",
-  );
 
   const checkSession = useCallback(async () => {
     const supabase = createClient();
@@ -206,7 +207,7 @@ export function AdminPanel() {
   if (authed === null) {
     return (
       <div className="page-shell">
-        <Nav admin subtitle="Period sign-up" />
+        <Nav admin />
         <p className={styles.loading}>Checking session…</p>
       </div>
     );
@@ -215,7 +216,7 @@ export function AdminPanel() {
   if (!authed || !isAdmin) {
     return (
       <div className="page-shell">
-        <Nav admin subtitle="Period sign-up" />
+        <Nav admin />
         <div className={styles.loginWrap}>
           <div className={`card elev-md ${styles.loginCard}`}>
             <div>
@@ -273,410 +274,172 @@ export function AdminPanel() {
     );
   }
 
-  const requestsSection = (
-    <section className={styles.section}>
-      <div className={styles.sectionHead}>
-        <h4>Booking requests</h4>
-        {pending.length > 0 && (
-          <span className="tag tag-accent">{pending.length} awaiting</span>
-        )}
-      </div>
-
-      {upcomingBookings.length === 0 && (
-        <div className="text-muted" style={{ fontSize: 14 }}>
-          No requests yet — teacher requests from the{" "}
-          <a href="/schedule">Schedule page</a> will appear here.
-        </div>
-      )}
-
-      <div className={styles.desktopList}>
-        {pending.map((r) => {
-          const d = parseIso(r.date);
-          const { dow, dd, mon } = formatAdminDate(d);
-          return (
-            <div key={r.id} className={`row-rule ${styles.reqRow}`}>
-              <div className={styles.dateCol}>
-                <div className={styles.dow}>{dow}</div>
-                <div className={styles.dd}>{dd}</div>
-                <div className={styles.mon}>{mon}</div>
-              </div>
-              <span className="tag tag-neutral">{periodLabel(r.period)}</span>
-              <div className={styles.reqBody}>
-                <div className={styles.reqName}>{r.name}</div>
-                <div className={styles.reqMeta}>
-                  Requested{" "}
-                  {new Date(r.created_at).toLocaleDateString("en-US", {
-                    day: "numeric",
-                    month: "short",
-                  })}
-                </div>
-                {r.drama_overlap && (
-                  <div className={styles.dramaWarn}>
-                    ⚠ Overlaps a Drama class — check with the theatre teacher
-                    before confirming
-                  </div>
-                )}
-              </div>
-              <div className={styles.reqActions}>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={() => void confirmBooking(r.id)}
-                >
-                  Confirm ✓
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  style={{ color: "var(--color-neutral-700)" }}
-                  onClick={() => void cancelBooking(r.id)}
-                >
-                  Decline
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className={styles.mobileCards}>
-        {pending.map((r) => {
-          const d = parseIso(r.date);
-          const { dow, dd, mon } = formatAdminDate(d);
-          const p = PERIODS.find((x) => x.id === r.period);
-          return (
-            <div key={r.id} className={styles.mCard}>
-              <div className={styles.mCardTop}>
-                <div className={styles.mDateBox}>
-                  <div className={styles.dow}>{dow}</div>
-                  <div className={styles.dd}>{dd}</div>
-                  <div className={styles.mon}>{mon}</div>
-                </div>
-                <div className={styles.reqBody}>
-                  <div className={styles.reqName}>{r.name}</div>
-                  <div className={styles.reqMeta}>
-                    {periodLabel(r.period)}
-                    {p ? ` · ${p.time}` : ""} · requested{" "}
-                    {new Date(r.created_at).toLocaleDateString("en-US", {
-                      day: "numeric",
-                      month: "short",
-                    })}
-                  </div>
-                  {r.drama_overlap && (
-                    <div className={styles.mDrama}>
-                      ⚠ Overlaps Drama. Check with the theatre teacher first.
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className={styles.mActions}>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  style={{ flex: 1, minHeight: 44 }}
-                  onClick={() => void confirmBooking(r.id)}
-                >
-                  Confirm ✓
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  style={{ flex: 1, minHeight: 44, color: "var(--color-neutral-700)" }}
-                  onClick={() => void cancelBooking(r.id)}
-                >
-                  Decline
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {confirmed.length > 0 && (
-        <div className={styles.upcoming}>
-          <h6>Upcoming · confirmed</h6>
-          {confirmed.map((u) => {
-            const d = parseIso(u.date);
-            const { dow, dd, mon } = formatAdminDate(d);
-            return (
-              <div key={u.id} className={styles.upRow}>
-                <span className="tag tag-outline">CONFIRMED</span>
-                <span className={styles.upText}>
-                  <strong>{u.name}</strong> · {dow} {dd} {mon} ·{" "}
-                  {periodLabel(u.period)}
-                </span>
-                <span style={{ flex: 1 }} />
-                <button
-                  type="button"
-                  className="btn btn-ghost"
-                  style={{ color: "var(--color-neutral-600)", fontSize: 13 }}
-                  onClick={() => void cancelBooking(u.id)}
-                >
-                  Cancel
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      <p className={`text-muted ${styles.helper}`}>
-        Requests stay pending until Masha approves them. Before confirming,
-        check with the theatre teacher and other staff for conflicts. Confirming
-        turns the slot solid on the Schedule page; declining frees the period.
-      </p>
-    </section>
-  );
-
-  const blocksSection = (
-    <section className={`${styles.section} ${styles.blocksSection}`}>
-      <div className={styles.sectionHead}>
-        <h4>Blocks &amp; Drama classes</h4>
-        {entries.length > 0 && (
-          <span className="tag tag-neutral">{entries.length} active</span>
-        )}
-      </div>
-      <p className="text-muted" style={{ fontSize: 13, margin: "0 0 14px" }}>
-        Blocks close the auditorium outright. Drama classes show as flexible —
-        teachers can still request the period, and the theatre teacher confirms
-        whether it&apos;s possible.
-      </p>
-
-      <div className={styles.blockForm}>
-        <div className="field">
-          <label htmlFor="blk-kind">Type</label>
-          <select
-            id="blk-kind"
-            className="select"
-            value={blkKind}
-            onChange={(e) => setBlkKind(e.target.value as EntryKind)}
-          >
-            <option value="block">Block — no bookings</option>
-            <option value="drama">Drama class — flexible</option>
-          </select>
-        </div>
-        <div className="field">
-          <label htmlFor="blk-repeat">Repeat</label>
-          <select
-            id="blk-repeat"
-            className="select"
-            value={blkRepeat}
-            onChange={(e) => setBlkRepeat(e.target.value as EntryRepeat)}
-          >
-            <option value="once">One day only</option>
-            <option value="weekly">Every week</option>
-          </select>
-        </div>
-        {blkRepeat === "once" ? (
-          <div className="field">
-            <label htmlFor="blk-date">Date</label>
-            <input
-              id="blk-date"
-              className="input"
-              type="date"
-              value={blkDate}
-              onChange={(e) => setBlkDate(e.target.value)}
-            />
-          </div>
-        ) : (
-          <>
-            <div className="field">
-              <label htmlFor="blk-dow">Every</label>
-              <select
-                id="blk-dow"
-                className="select"
-                value={blkDow}
-                onChange={(e) => setBlkDow(e.target.value as Dow)}
-              >
-                {DOWS.map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="field">
-              <label htmlFor="blk-until">Until · optional</label>
-              <input
-                id="blk-until"
-                className="input"
-                type="date"
-                value={blkUntil}
-                onChange={(e) => setBlkUntil(e.target.value)}
-              />
-            </div>
-          </>
-        )}
-        <div className="field">
-          <label htmlFor="blk-from">From</label>
-          <select
-            id="blk-from"
-            className="select"
-            value={blkFrom}
-            onChange={(e) => setBlkFrom(e.target.value as PeriodId)}
-          >
-            {PERIODS.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.label}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="field">
-          <label htmlFor="blk-to">To</label>
-          <select
-            id="blk-to"
-            className="select"
-            value={blkTo}
-            onChange={(e) => setBlkTo(e.target.value as PeriodId)}
-          >
-            {PERIODS.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.label}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className={`field ${styles.reasonField}`}>
-          <label htmlFor="blk-reason">Label · shown to teachers</label>
-          <input
-            id="blk-reason"
-            className="input"
-            value={blkReason}
-            onChange={(e) => setBlkReason(e.target.value)}
-            placeholder={
-              blkKind === "drama"
-                ? "e.g. Drama — Gr. 9/10"
-                : "e.g. Pep rally setup, maintenance"
-            }
-          />
-        </div>
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={() => void addBlock()}
-          disabled={blkBusy}
-        >
-          {blkKind === "drama" ? "Add class →" : "Block →"}
-        </button>
-      </div>
-
-      {conflicts > 0 && (
-        <div className={styles.conflict}>
-          ⚠ This block overlaps {conflicts} existing booking
-          {conflicts === 1 ? "" : "s"}. Existing bookings stay — cancel them
-          above if needed.
-        </div>
-      )}
-      {blkError && <div className={styles.loginError}>{blkError}</div>}
-
-      {entries.length > 0 && (
-        <div className={styles.activeBlocks}>
-          <h6>Active blocks &amp; classes</h6>
-          {entries.map((b) => {
-            const isDrama = b.kind === "drama";
-            const when =
-              (b.repeat === "once"
-                ? formatOnceLabel(b.date!)
-                : `EVERY ${b.dow}${b.until ? ` UNTIL ${formatOnceLabel(b.until)}` : ""}`) +
-              ` · ${periodRangeLabel(b.from_period, b.to_period)}`;
-            return (
-              <div key={b.id} className={styles.blockRow}>
-                <div
-                  className={styles.swatch}
-                  style={{
-                    background: isDrama
-                      ? "var(--red-tint)"
-                      : "repeating-linear-gradient(45deg, var(--color-neutral-200) 0, var(--color-neutral-200) 3px, var(--color-neutral-100) 3px, var(--color-neutral-100) 6px)",
-                    border: `1px solid ${isDrama ? "var(--red-line)" : "var(--color-neutral-300)"}`,
-                  }}
-                />
-                <span
-                  className="tag"
-                  style={{
-                    background: isDrama
-                      ? "var(--red-tint)"
-                      : "var(--color-neutral-200)",
-                    color: isDrama
-                      ? "var(--red-deep)"
-                      : "var(--color-neutral-800)",
-                  }}
-                >
-                  {isDrama ? "DRAMA" : "BLOCK"}
-                </span>
-                <span className={styles.blockWhen}>{when}</span>
-                <span className={styles.blockReason}>{b.reason}</span>
-                <span style={{ flex: 1 }} />
-                <button
-                  type="button"
-                  className={styles.removeBtn}
-                  title="Remove"
-                  onClick={() => void removeEntry(b.id)}
-                >
-                  ×
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </section>
-  );
+  const pendingRows = pending.map((r) => {
+    const d = parseIso(r.date);
+    const { dow, dd, mon } = formatAdminDate(d);
+    const p = PERIODS.find((x) => x.id === r.period);
+    return { r, dow, dd, mon, p };
+  });
 
   return (
     <div className="page-shell">
-      <Nav admin subtitle="Period sign-up" onSignOut={() => void signOut()} />
+      <Nav admin onSignOut={() => void signOut()} />
 
       <div className={styles.titleRow}>
         <div>
           <div className={styles.kicker}>Office · Admin</div>
           <h1 className={styles.title}>Auditorium admin</h1>
         </div>
-        <div className={styles.liveNote}>Live via Supabase</div>
       </div>
 
-      <div className={styles.mobileTabs}>
+      <div className={styles.pills} role="tablist" aria-label="Admin sections">
         <button
           type="button"
-          className={mobileTab === "requests" ? styles.tabActive : styles.tab}
-          onClick={() => setMobileTab("requests")}
+          role="tab"
+          aria-selected={tab === "bookings"}
+          className={tab === "bookings" ? styles.pillActive : styles.pill}
+          onClick={() => setTab("bookings")}
         >
-          Requests
+          Booking requests
+          {pending.length > 0 && (
+            <span className={styles.pillBadge}>{pending.length}</span>
+          )}
         </button>
         <button
           type="button"
-          className={mobileTab === "upcoming" ? styles.tabActive : styles.tab}
-          onClick={() => setMobileTab("upcoming")}
+          role="tab"
+          aria-selected={tab === "blocks"}
+          className={tab === "blocks" ? styles.pillActive : styles.pill}
+          onClick={() => setTab("blocks")}
         >
-          Upcoming
-        </button>
-        <button
-          type="button"
-          className={mobileTab === "blocks" ? styles.tabActive : styles.tab}
-          onClick={() => setMobileTab("blocks")}
-        >
-          Blocks &amp; Drama
+          Blocks &amp; Drama classes
+          {entries.length > 0 && (
+            <span className={styles.pillMuted}>{entries.length}</span>
+          )}
         </button>
       </div>
 
-      <div className={styles.desktopPanels}>
-        {requestsSection}
-        {blocksSection}
-      </div>
-
-      <div className={styles.mobilePanels}>
-        {mobileTab === "requests" && requestsSection}
-        {mobileTab === "upcoming" && (
-          <section className={styles.section}>
-            <div className={styles.sectionHead}>
-              <h4>Upcoming confirmed</h4>
+      {tab === "bookings" && (
+        <section className={styles.section}>
+          <div className={styles.sectionHead}>
+            <div className={styles.sectionHeadLeft}>
+              <h4>Booking requests</h4>
+              {pending.length > 0 && (
+                <span className="tag tag-accent">{pending.length} AWAITING</span>
+              )}
             </div>
-            {confirmed.length === 0 ? (
-              <p className="text-muted" style={{ fontSize: 14 }}>
-                No confirmed bookings yet.
-              </p>
-            ) : (
-              confirmed.map((u) => {
+            <span className={styles.sectionMeta}>From the Schedule page</span>
+          </div>
+
+          {upcomingBookings.length === 0 && (
+            <div className="text-muted" style={{ fontSize: 14 }}>
+              No requests yet — teacher requests from the{" "}
+              <a href="/schedule">Schedule page</a> will appear here.
+            </div>
+          )}
+
+          <div className={styles.desktopList}>
+            {pendingRows.map(({ r, dow, dd, mon }) => (
+              <div key={r.id} className={`row-rule ${styles.reqRow}`}>
+                <div className={styles.dateCol}>
+                  <div className={styles.dow}>{dow}</div>
+                  <div className={styles.dd}>{dd}</div>
+                  <div className={styles.mon}>{mon}</div>
+                </div>
+                <span className="tag tag-neutral">{periodLabel(r.period)}</span>
+                <div className={styles.reqBody}>
+                  <div className={styles.reqName}>{r.name}</div>
+                  <div className={styles.reqMeta}>
+                    Requested{" "}
+                    {new Date(r.created_at).toLocaleDateString("en-US", {
+                      day: "numeric",
+                      month: "short",
+                    })}
+                  </div>
+                  {r.drama_overlap && (
+                    <div className={styles.dramaWarn}>
+                      ⚠ Overlaps a Drama class — check with the theatre teacher
+                      before confirming
+                    </div>
+                  )}
+                </div>
+                <div className={styles.reqActions}>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => void confirmBooking(r.id)}
+                  >
+                    Confirm ✓
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    style={{ color: "var(--color-neutral-700)" }}
+                    onClick={() => void cancelBooking(r.id)}
+                  >
+                    Decline
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className={styles.mobileCards}>
+            {pendingRows.map(({ r, dow, dd, mon, p }) => (
+              <div key={r.id} className={styles.mCard}>
+                <div className={styles.mCardTop}>
+                  <div className={styles.mDateBox}>
+                    <div className={styles.dow}>{dow}</div>
+                    <div className={styles.dd}>{dd}</div>
+                    <div className={styles.mon}>{mon}</div>
+                  </div>
+                  <div className={styles.reqBody}>
+                    <div className={styles.reqName}>{r.name}</div>
+                    <div className={styles.reqMeta}>
+                      {periodLabel(r.period)}
+                      {p ? ` · ${p.time}` : ""} · requested{" "}
+                      {new Date(r.created_at).toLocaleDateString("en-US", {
+                        day: "numeric",
+                        month: "short",
+                      })}
+                    </div>
+                    {r.drama_overlap && (
+                      <div className={styles.mDrama}>
+                        ⚠ Overlaps Drama. Check with the theatre teacher first.
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className={styles.mActions}>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    style={{ flex: 1, minHeight: 44 }}
+                    onClick={() => void confirmBooking(r.id)}
+                  >
+                    Confirm ✓
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    style={{
+                      flex: 1,
+                      minHeight: 44,
+                      color: "var(--color-neutral-700)",
+                    }}
+                    onClick={() => void cancelBooking(r.id)}
+                  >
+                    Decline
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {confirmed.length > 0 && (
+            <div className={styles.upcoming}>
+              <h6>Upcoming · confirmed</h6>
+              {confirmed.map((u) => {
                 const d = parseIso(u.date);
                 const { dow, dd, mon } = formatAdminDate(d);
                 return (
@@ -686,21 +449,245 @@ export function AdminPanel() {
                       <strong>{u.name}</strong> · {dow} {dd} {mon} ·{" "}
                       {periodLabel(u.period)}
                     </span>
+                    <span style={{ flex: 1 }} />
                     <button
                       type="button"
                       className="btn btn-ghost"
+                      style={{ color: "var(--color-neutral-600)", fontSize: 13 }}
                       onClick={() => void cancelBooking(u.id)}
                     >
                       Cancel
                     </button>
                   </div>
                 );
-              })
-            )}
-          </section>
-        )}
-        {mobileTab === "blocks" && blocksSection}
-      </div>
+              })}
+            </div>
+          )}
+
+          <p className={`text-muted ${styles.helper}`}>
+            Requests stay pending until the office approves them. Before
+            confirming, check with the theatre teacher and other staff for
+            conflicts. Confirming turns the slot solid on the Schedule page;
+            declining frees the period.
+          </p>
+        </section>
+      )}
+
+      {tab === "blocks" && (
+        <section className={`${styles.section} ${styles.blocksSection}`}>
+          <div className={styles.blocksHead}>
+            <div className={styles.blocksHeadLeft}>
+              <h4>Blocks &amp; Drama classes</h4>
+              {entries.length > 0 && (
+                <span className="tag tag-neutral">{entries.length} ACTIVE</span>
+              )}
+              <span className={styles.blocksBlurb}>
+                Blocks close the auditorium outright; Drama classes stay
+                requestable.
+              </span>
+            </div>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              style={{ flex: "none", color: "var(--color-neutral-700)" }}
+              onClick={() => setBlkOpen((open) => !open)}
+            >
+              {blkOpen ? "Close form" : "+ Add"}
+            </button>
+          </div>
+
+          {blkOpen && (
+            <>
+              <div className={styles.blockForm}>
+                <div className="field">
+                  <label htmlFor="blk-kind">Type</label>
+                  <select
+                    id="blk-kind"
+                    className="select"
+                    value={blkKind}
+                    onChange={(e) => setBlkKind(e.target.value as EntryKind)}
+                  >
+                    <option value="block">Block — no bookings</option>
+                    <option value="drama">Drama class — flexible</option>
+                  </select>
+                </div>
+                <div className="field">
+                  <label htmlFor="blk-repeat">Repeat</label>
+                  <select
+                    id="blk-repeat"
+                    className="select"
+                    value={blkRepeat}
+                    onChange={(e) =>
+                      setBlkRepeat(e.target.value as EntryRepeat)
+                    }
+                  >
+                    <option value="once">One day only</option>
+                    <option value="weekly">Every week</option>
+                  </select>
+                </div>
+                {blkRepeat === "once" ? (
+                  <div className="field">
+                    <label htmlFor="blk-date">Date</label>
+                    <input
+                      id="blk-date"
+                      className="input"
+                      type="date"
+                      value={blkDate}
+                      onChange={(e) => setBlkDate(e.target.value)}
+                    />
+                  </div>
+                ) : (
+                  <>
+                    <div className="field">
+                      <label htmlFor="blk-dow">Every</label>
+                      <select
+                        id="blk-dow"
+                        className="select"
+                        value={blkDow}
+                        onChange={(e) => setBlkDow(e.target.value as Dow)}
+                      >
+                        {DOWS.map((d) => (
+                          <option key={d} value={d}>
+                            {d}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="field">
+                      <label htmlFor="blk-until">Until · optional</label>
+                      <input
+                        id="blk-until"
+                        className="input"
+                        type="date"
+                        value={blkUntil}
+                        onChange={(e) => setBlkUntil(e.target.value)}
+                      />
+                    </div>
+                  </>
+                )}
+                <div className="field">
+                  <label htmlFor="blk-from">From</label>
+                  <select
+                    id="blk-from"
+                    className="select"
+                    value={blkFrom}
+                    onChange={(e) => setBlkFrom(e.target.value as PeriodId)}
+                  >
+                    {PERIODS.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="field">
+                  <label htmlFor="blk-to">To</label>
+                  <select
+                    id="blk-to"
+                    className="select"
+                    value={blkTo}
+                    onChange={(e) => setBlkTo(e.target.value as PeriodId)}
+                  >
+                    {PERIODS.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className={`field ${styles.reasonField}`}>
+                  <label htmlFor="blk-reason">Label · shown to teachers</label>
+                  <input
+                    id="blk-reason"
+                    className="input"
+                    value={blkReason}
+                    onChange={(e) => setBlkReason(e.target.value)}
+                    placeholder={
+                      blkKind === "drama"
+                        ? "e.g. Drama — Gr. 9/10"
+                        : "e.g. Pep rally setup, maintenance"
+                    }
+                  />
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => void addBlock()}
+                  disabled={blkBusy}
+                >
+                  {blkKind === "drama" ? "Add class →" : "Block →"}
+                </button>
+              </div>
+
+              {conflicts > 0 && (
+                <div className={styles.conflict}>
+                  ⚠ This overlaps {conflicts} existing booking
+                  {conflicts === 1 ? "" : "s"}. Existing bookings stay — cancel
+                  them in Booking requests if needed.
+                </div>
+              )}
+              {blkError && <div className={styles.loginError}>{blkError}</div>}
+            </>
+          )}
+
+          {entries.length > 0 && (
+            <div className={styles.activeBlocks}>
+              <h6>Active blocks &amp; classes</h6>
+              {entries.map((b) => {
+                const isDrama = b.kind === "drama";
+                const when =
+                  (b.repeat === "once"
+                    ? formatOnceLabel(b.date!)
+                    : `EVERY ${b.dow}${b.until ? ` UNTIL ${formatOnceLabel(b.until)}` : ""}`) +
+                  ` · ${periodRangeLabel(b.from_period, b.to_period)}`;
+                return (
+                  <div key={b.id} className={styles.blockRow}>
+                    <div
+                      className={styles.swatch}
+                      style={{
+                        background: isDrama
+                          ? "var(--red-tint)"
+                          : "repeating-linear-gradient(45deg, var(--color-neutral-200) 0, var(--color-neutral-200) 3px, var(--color-neutral-100) 3px, var(--color-neutral-100) 6px)",
+                        border: `1px solid ${isDrama ? "var(--red-line)" : "var(--color-neutral-300)"}`,
+                      }}
+                    />
+                    <span
+                      className="tag"
+                      style={{
+                        background: isDrama
+                          ? "var(--red-tint)"
+                          : "var(--color-neutral-200)",
+                        color: isDrama
+                          ? "var(--red-deep)"
+                          : "var(--color-neutral-800)",
+                      }}
+                    >
+                      {isDrama ? "DRAMA" : "BLOCK"}
+                    </span>
+                    <span className={styles.blockWhen}>{when}</span>
+                    <span className={styles.blockReason}>{b.reason}</span>
+                    <span style={{ flex: 1 }} />
+                    <button
+                      type="button"
+                      className={styles.removeBtn}
+                      title="Remove"
+                      onClick={() => void removeEntry(b.id)}
+                    >
+                      ×
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <p className={`text-muted ${styles.helper}`}>
+            Blocked periods show striped on the Schedule page with your label —
+            teachers can&apos;t request them. Drama classes show as flexible; the
+            theatre teacher confirms those requests.
+          </p>
+        </section>
+      )}
 
       <div className="page-footer">
         <span>Changes save automatically and appear on the Schedule page.</span>

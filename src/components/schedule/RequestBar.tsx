@@ -50,7 +50,7 @@ export function RequestBar({
           </span>
           <span className={styles.statusText}>
             {pending
-              ? "Awaiting Masha's approval — requested by"
+              ? "Awaiting office approval — requested by"
               : "Confirmed for"}{" "}
             <strong>{selection.booking.name}</strong>
           </span>

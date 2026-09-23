@@ -1,13 +1,13 @@
 # Auditorium Period Sign-up
 
-Next.js (App Router) + Supabase app for one school auditorium, school year **2026–27**. Teachers request a single period (P1–P8 or After School); requests stay **pending until Masha approves** them in the admin panel.
+Next.js (App Router) + Supabase app for one school auditorium, school year **2026–27**. Teachers request a single period (P1–P8 or After School); requests stay **pending until an admin approves** them.
 
 ## Pages
 
 | Route | Who | What |
 |-------|-----|------|
 | `/schedule` | Public | Week grid (desktop) / day list + bottom sheet (mobile 1a) |
-| `/admin` | Auth + admin allow-list | Pending inbox, confirmed list, Blocks & Drama manager |
+| `/admin` | Auth + admin allow-list | Pill tabs: Booking requests (inbox + confirmed) and Blocks & Drama classes |
 
 ## Setup
 

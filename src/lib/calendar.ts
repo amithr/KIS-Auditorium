@@ -235,14 +235,12 @@ export function findEntry(
   periodId: string,
 ): ScheduleEntry | undefined {
   const iso = toIso(date);
-  const dow = dowOf(date);
-  return entries.find((e) => {
-    if (!periodInRange(periodId as never, e.from_period, e.to_period)) {
-      return false;
-    }
-    if (e.repeat === "once") return e.date === iso;
-    return e.dow === dow && (!e.until || iso <= e.until);
-  });
+  const matches = entries.filter(
+    (e) =>
+      periodInRange(periodId as never, e.from_period, e.to_period) &&
+      entryAppliesToDate(e, iso),
+  );
+  return matches.find((e) => e.repeat === "once") ?? matches[0];
 }
 
 export function entryAppliesToDate(e: ScheduleEntry, iso: string): boolean {

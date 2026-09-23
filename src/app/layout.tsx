@@ -12,7 +12,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Auditorium · Period sign-up 2026–27",
   description:
-    "Sign up for the school auditorium — one period at a time. Requests stay pending until Masha approves them.",
+    "Sign up for the school auditorium — one period at a time. Requests stay pending until the office approves them.",
 };
 
 export default function RootLayout({

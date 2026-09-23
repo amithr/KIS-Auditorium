@@ -34,7 +34,7 @@
 }
 
 .titleRow {
-  padding: 38px 36px 0;
+  padding: 40px 36px 0;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
@@ -46,39 +46,115 @@
   margin: 0;
 }
 
-.liveNote {
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-neutral-500);
-  padding-bottom: 6px;
+.pills {
+  padding: 22px 36px 30px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pill,
+.pillActive {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  padding: 8px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s;
+  background: transparent;
+  color: var(--color-neutral-600);
+  border: 1px solid var(--color-divider);
+}
+
+.pill:hover,
+.pillActive:hover {
+  border-color: var(--color-accent-600);
+}
+
+.pillActive {
+  background: var(--color-accent-100);
+  color: var(--color-accent-800);
+  border-color: var(--color-accent-500);
+}
+
+.pillBadge {
+  font-size: 10.5px;
+  background: var(--color-accent-600);
+  color: #fcfcfe;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.pillMuted {
+  font-size: 10.5px;
+  opacity: 0.55;
 }
 
 .section {
-  margin: 34px 36px 0;
-  max-width: 860px;
+  margin: 0 36px 44px;
+  max-width: 900px;
 }
 
 .blocksSection {
-  margin: 40px 36px 46px;
+  margin-bottom: 46px;
 }
 
 .sectionHead {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
   padding-bottom: 10px;
+  gap: 16px;
 }
 
-.sectionHead h4 {
+.sectionHeadLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sectionHead h4,
+.blocksHead h4 {
   margin: 0;
+}
+
+.sectionMeta {
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-neutral-500);
+}
+
+.blocksHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 4px;
+}
+
+.blocksHeadLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.blocksBlurb {
+  font-size: 13px;
+  color: var(--color-neutral-600);
 }
 
 .reqRow {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 11px 0;
+  padding: 12px 0;
 }
 
 .dateCol {
@@ -134,12 +210,12 @@
 }
 
 .upcoming {
-  padding: 16px 0 0;
+  padding: 18px 0 0;
 }
 
 .upcoming h6 {
   font-size: 10.5px;
-  color: var(--color-neutral-600);
+  color: var(--color-neutral-500);
   margin-bottom: 6px;
 }
 
@@ -166,6 +242,7 @@
 }
 
 .blockForm {
+  padding: 14px 0 6px;
   display: flex;
   align-items: flex-end;
   gap: 14px;
@@ -178,7 +255,7 @@
 }
 
 .conflict {
-  margin-top: 12px;
+  margin: 10px 0 4px;
   border: 1px solid var(--color-accent-400);
   border-radius: var(--radius-md);
   background: var(--color-accent-100);
@@ -193,7 +270,7 @@
 
 .activeBlocks h6 {
   font-size: 10.5px;
-  color: var(--color-neutral-600);
+  color: var(--color-neutral-500);
   margin-bottom: 6px;
 }
 
@@ -246,18 +323,6 @@
   display: none;
 }
 
-.mobileTabs {
-  display: none;
-}
-
-.desktopPanels {
-  display: block;
-}
-
-.mobilePanels {
-  display: none;
-}
-
 .mCard {
   border-radius: 14px;
   background: var(--color-surface);
@@ -297,25 +362,6 @@
   margin-top: 12px;
 }
 
-.tab,
-.tabActive {
-  flex: 1;
-  min-height: 40px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-divider);
-  background: transparent;
-  font: inherit;
-  font-size: 13px;
-  cursor: pointer;
-  color: var(--color-neutral-700);
-}
-
-.tabActive {
-  border-color: var(--color-accent-500);
-  color: var(--color-accent-700);
-  background: var(--color-accent-100);
-}
-
 @media (max-width: 860px) {
   .titleRow {
     padding: 24px 18px 0;
@@ -325,16 +371,16 @@
     font-size: 26px;
   }
 
-  .liveNote {
-    display: none;
+  .pills {
+    padding: 16px 18px 18px;
   }
 
   .section {
-    margin: 20px 18px 0;
+    margin: 0 18px 40px;
   }
 
-  .blocksSection {
-    margin: 20px 18px 40px;
+  .sectionMeta {
+    display: none;
   }
 
   .desktopList {
@@ -345,25 +391,15 @@
     display: block;
   }
 
-  .mobileTabs {
-    display: flex;
-    gap: 8px;
-    padding: 16px 18px 0;
-  }
-
-  .desktopPanels {
-    display: none;
-  }
-
-  .mobilePanels {
-    display: block;
-  }
-
   .reqActions {
     flex-wrap: wrap;
   }
 
-  .helper {
-    display: none;
+  .blocksHead {
+    align-items: flex-start;
+  }
+
+  .blockWhen {
+    flex: 1 1 100%;
   }
 }
