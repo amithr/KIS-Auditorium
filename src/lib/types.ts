@@ -1,4 +1,14 @@
-export type PeriodId = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "AS";
+export type PeriodId =
+  | "1"
+  | "2"
+  | "3"
+  | "4"
+  | "L"
+  | "5"
+  | "6"
+  | "7"
+  | "8"
+  | "AS";
 export type BookingStatus = "pending" | "confirmed";
 export type EntryRepeat = "once" | "weekly";
 export type Dow = "MON" | "TUE" | "WED" | "THU" | "FRI";

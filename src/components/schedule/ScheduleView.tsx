@@ -190,7 +190,7 @@ export function ScheduleView() {
           </div>
           <h1>Sign up for the auditorium</h1>
           <p className="text-muted">
-            Click an open period — any school day this year, P1–P8 or After
+            Click an open period — any school day this year, P1–P8, Lunch or After
             School. Requests stay pending until the office approves them.
           </p>
         </div>
@@ -329,7 +329,7 @@ export function ScheduleView() {
       </div>
 
       <div className={`page-footer ${styles.desktopOnly}`}>
-        Requests cover one period (P1–P8 or After School) · bookable through Jun
+        Requests cover one period (P1–P8, Lunch or After School) · bookable through Jun
         18 · the office approves each request — red/black days follow the 2026–27
         calendar
       </div>

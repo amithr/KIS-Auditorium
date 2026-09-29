@@ -1,6 +1,6 @@
 # Auditorium Period Sign-up
 
-Next.js (App Router) + Supabase app for one school auditorium, school year **2026–27**. Teachers request a single period (P1–P8 or After School); requests stay **pending until an admin approves** them.
+Next.js (App Router) + Supabase app for one school auditorium, school year **2026–27**. Teachers request a single period (P1–P8, Lunch or After School); requests stay **pending until an admin approves** them.
 
 ## Pages
 

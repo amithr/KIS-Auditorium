@@ -5,6 +5,7 @@ export const PERIODS: Period[] = [
   { id: "2", label: "P2", time: "9:30 – 10:10" },
   { id: "3", label: "P3", time: "10:30 – 11:10" },
   { id: "4", label: "P4", time: "11:15 – 11:55" },
+  { id: "L", label: "Lunch", time: "11:55 – 12:50" },
   { id: "5", label: "P5", time: "12:50 – 1:30" },
   { id: "6", label: "P6", time: "1:35 – 2:15" },
   { id: "7", label: "P7", time: "2:35 – 3:15" },
